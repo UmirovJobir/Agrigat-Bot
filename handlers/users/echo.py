@@ -1,7 +1,7 @@
 from aiogram_media_group import media_group_handler
 from aiogram import types, filters
 from aiogram import Dispatcher, Bot
-from loader import dp
+from loader import dp, bot
 from keyboards.inline.callback_data import catalog_callback
 from keyboards.inline.catalog_inline_button import inline_button
 from API.langugages import get_language
@@ -19,7 +19,7 @@ def caption_data(message):
     data = json.loads(message)
 
     user_id = data['user_id']
-    fullnamedata = ['fullname']
+    fullname = data['fullname']
     group_id = data['group_id']
     group_title = data['group_title']
     group_link = data['group_link']
@@ -33,17 +33,29 @@ def caption_data(message):
 
 @dp.message_handler(is_media_group=True, content_types=types.ContentType.ANY)
 async def handle_albums(message: types.Message, album: List[types.Message]):
-    """This handler will receive a complete album of any type."""
     media_group = types.MediaGroup()
     for obj in album:
         caption = obj.caption
         if caption != None:
                 caption = json.loads(caption)
-                message_text = caption["message_text"]
-                print(message_text)
+                
+                username = caption["username"]
+                user_id = caption["user_id"]
+                fullname = ["fullname"]
+
+                group_id = caption["group_id"]
+                group_title = caption['group_title']
+                group_username = caption['group_username']
+
+                message_id = caption['message_id']
+                message_text = caption['message_text']
+                message_link = caption["message_link"]
+
                 catalog_options = caption['catalog_options']
                 lan = caption["lan"]
+                channel = caption["channel"]
 
+    
         if obj.photo:
             file_id = obj.photo[-1].file_id
         else:
@@ -55,73 +67,34 @@ async def handle_albums(message: types.Message, album: List[types.Message]):
         except ValueError:
             return await message.answer("This type of album is not supported by aiogram.")
 
-    a = json.loads(media_group.as_json())
-    for i in a:
-        print(i)
-
-    await message.answer_media_group(media_group)
-    await message.answer(message_text, reply_markup=inline_button(catalog_options, lan))
+    if channel=="False": 
+        txt  = f"Statusi: Bazaga #joylanmadi\n"
+        txt += f"User {username}\n"
+        txt += f"Group {group_username}\n"
+        txt += f"Message: {message_text}\n"
+        txt += f"Message_link: {message_link}"
     
-    # await message.answer_media_group(chat_id=-1001763109051, media=media_group)
-    # await message.answer(chat_id=-1001763109051, text=message_text, reply_markup=inline_button(catalog_options, lan))
+    else:
+        txt = "True"
 
-# 
-# Echo photo bot
 
-# @dp.message_handler(content_types=types.ContentType.ANY)
-# async def album_handler(message: types.Message):
+    media_files_id = json.loads(media_group.as_json())
     
-    
-    
-    # await messages[-1].reply_media_group(
-    #     [
-    #         types.InputMediaPhoto(
-    #             media=m.photo[-1].file_id,
-    #             caption=m.caption,
-    #             caption_entities=m.caption_entities,
-    #         )
-    #         for m in messages
-    #     ]
-    # )
+    # await bot.send_media_group(-1001578600046, media=media_group)
+    await bot.send_message(-1001578600046, text=txt, reply_markup=inline_button(catalog_options, lan), parse_mode=types.ParseMode.HTML)
 
 
 
-# Echo bot
-# @dp.message_handler(state=None, content_types=types.ContentType.ANY)
-# async def bot_echo(message: types.Message):
-    # data = message.text
-    # data = json.loads(data)
+@dp.message_handler(state=None)
+async def bot_echo(message: types.Message):
+    caption = json.loads(message.text)
+    message_text = caption["message_text"]
+    catalog_options = caption['catalog_options']
+    lan = caption["lan"]
 
-    # user_id = data['user_id']
-    # fullnamedata = ['fullname']
-    # group_id = data['group_id']
-    # group_title = data['group_title']
-    # group_link = data['group_link']
-    # message_id = data['message_id']
-    # message_text = data['message_text']
-    # message_link = data['message_link']
-    # catalog_options = data['catalog_options']
-    # lan = data["lan"]
+    print(message_text)
 
-    # if message.media_group_id != None:
-    #     album = types.MediaGroup()
-        
-        
-        # id = message.photo[0]
-        # print(id)
-        # album.attach_photo(photo=id)
-        # for i in message:
-        #     print(i'photo')
-        # await message.reply_media_group(media=album)
-    # elsie:
-    #     prnt(message)
-    # if message.media_group_id != None:
-    #     if len(message_text.split()) > 3:
-    #         categories = get_language(
-    #             data['message_text'], response_ru, response_cyrl, response_uz)
-    #         print(categories)   
-
-    # await message.answer_photo(id)#, reply_markup=inline_button(catalog_options, lan))
+    await message.answer(message_text)
 
 
 
