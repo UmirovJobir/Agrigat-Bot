@@ -10,27 +10,20 @@ response_uz = requests.get(url, headers={'language': "uz_latn"})
 response_cyrl = requests.get(url, headers={'language': "uz_cyrl"})
 
 
-def get_catalog(catalog):
+def get_catalog(catalog, lan):
     payload={}
     headers = {
-        'content-type': 'application/json'
+        'content-type': 'application/json',
+        'language': f"{lan}"
     }
-
     if catalog == 0:
         url = "https://aztester.uz/api-announcement/v1/category/tree"
         response = requests.request("GET", url, headers=headers, data=payload)
-        # for i in response.json()['data']:
-        #     print(i['name'], i['id'])
-
         return response.json()['data']
     else:
         url = f'https://aztester.uz/api-announcement/v1/category?category_id={catalog}'
         response = requests.request("GET", url, headers=headers, data=payload)
-        # for i in response.json()['data'][0]['child_categories']:
-        for i in response.json()['data']:
-            print(i['name'])
-
-        return response.json()['data'][0]['child_categories']
+        return response.json()['data'][0]
 
 
 def get_catalog_by_id(catalog, lan):
@@ -42,9 +35,8 @@ def get_catalog_by_id(catalog, lan):
     url = f'https://aztester.uz/api-announcement/v1/category?category_id={catalog}'
     response = requests.request("GET", url, headers=headers, data=payload)
     for i in response.json()['data']:
-        # print(i['name'])
         return i['name']
 
 
-# get_catalog(catalog=1181)
-get_catalog_by_id(catalog=1140, lan='uz_latn')
+get_catalog(catalog=0, lan='ru')
+# get_catalog_by_id(catalog=1140, lan='uz_latn')

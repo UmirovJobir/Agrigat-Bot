@@ -2,7 +2,7 @@ from aiogram_media_group import media_group_handler
 from aiogram import types, filters
 from aiogram import Dispatcher, Bot
 from loader import dp, bot
-from keyboards.inline.callback_data import catalog_callback
+from aiogram.dispatcher import FSMContext
 from keyboards.inline.catalog_inline_button import inline_button
 from API.langugages import get_language
 from API.catalog_API import (
@@ -38,7 +38,7 @@ async def handle_albums(message: types.Message, album: List[types.Message]):
         caption = obj.caption
         if caption != None:
                 caption = json.loads(caption)
-                
+
                 username = caption["username"]
                 user_id = caption["user_id"]
                 fullname = ["fullname"]
@@ -54,8 +54,7 @@ async def handle_albums(message: types.Message, album: List[types.Message]):
                 catalog_options = caption['catalog_options']
                 lan = caption["lan"]
                 channel = caption["channel"]
-
-    
+  
         if obj.photo:
             file_id = obj.photo[-1].file_id
         else:
@@ -86,29 +85,31 @@ async def handle_albums(message: types.Message, album: List[types.Message]):
 
 
 @dp.message_handler(state=None)
-async def bot_echo(message: types.Message):
+async def bot_echo(message: types.Message, state: FSMContext):
     caption = json.loads(message.text)
     message_text = caption["message_text"]
     catalog_options = caption['catalog_options']
     lan = caption["lan"]
 
-    print(message_text)
-
+    await state.update_data(lan=lan)
     await message.answer(message_text)
 
 
 
-@dp.callback_query_handler(text_contains="catalog")
-async def buy_books(call: types.CallbackQuery):
+@dp.callback_query_handler(text_contains="catalog_id")
+async def buy_books(call: types.CallbackQuery, state: FSMContext):
     callback_data = call.data.split(":")
-    print(callback_data[1])
+    
+    async with state.proxy() as data:
+        print(data)
 
     await call.message.answer(callback_data)
 
 
-# @dp.callback_query_handler(text="cancel")
-# async def cancel_buying(call: CallbackQuery):
-#     # Oynada javob qaytaramiz
+@dp.callback_query_handler(text_contains="all_catalog")
+async def buy_books(call: types.CallbackQuery):
+    callback_data = call.data[1]
+    catalog = get_catalog(callback_data)
 
-#     await call.message.edit_reply_markup(reply_markup=inline_button(catalog_options))
-#     await call.answer()
+    print(catalog)
+    await call.message.answer(catalog)
