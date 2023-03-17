@@ -3,7 +3,7 @@ from aiogram import types, filters
 from aiogram import Dispatcher, Bot
 from loader import dp, bot
 from aiogram.dispatcher import FSMContext
-from keyboards.inline.catalog_inline_button import inline_button
+from keyboards.inline.catalog_inline_button import inline_button, all_catalogs
 from API.langugages import get_language
 from API.catalog_API import (
     get_catalog,
@@ -30,9 +30,10 @@ def caption_data(message):
     lan = data["lan"]
 
 
+lan_test = None
 
 @dp.message_handler(is_media_group=True, content_types=types.ContentType.ANY)
-async def handle_albums(message: types.Message, album: List[types.Message]):
+async def handle_albums(message: types.Message, album: List[types.Message], state: FSMContext):
     media_group = types.MediaGroup()
     for obj in album:
         caption = obj.caption
@@ -76,7 +77,6 @@ async def handle_albums(message: types.Message, album: List[types.Message]):
     else:
         txt = "True"
 
-
     media_files_id = json.loads(media_group.as_json())
     
     # await bot.send_media_group(-1001578600046, media=media_group)
@@ -91,7 +91,8 @@ async def bot_echo(message: types.Message, state: FSMContext):
     catalog_options = caption['catalog_options']
     lan = caption["lan"]
 
-    await state.update_data(lan=lan)
+    await state.update_data({"lan":lan})
+
     await message.answer(message_text)
 
 
@@ -100,16 +101,15 @@ async def bot_echo(message: types.Message, state: FSMContext):
 async def buy_books(call: types.CallbackQuery, state: FSMContext):
     callback_data = call.data.split(":")
     
-    async with state.proxy() as data:
-        print(data)
+    print(call.data)
 
     await call.message.answer(callback_data)
 
 
 @dp.callback_query_handler(text_contains="all_catalog")
 async def buy_books(call: types.CallbackQuery):
-    callback_data = call.data[1]
-    catalog = get_catalog(callback_data)
+    callback_data = call.data.split(":")
 
-    print(catalog)
-    await call.message.answer(catalog)
+    catalogs = all_catalogs(int(callback_data[1]),callback_data[2])
+
+    await call.message.edit_reply_markup(reply_markup=catalogs)

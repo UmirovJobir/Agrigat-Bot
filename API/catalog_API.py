@@ -23,7 +23,7 @@ def get_catalog(catalog, lan):
     else:
         url = f'https://aztester.uz/api-announcement/v1/category?category_id={catalog}'
         response = requests.request("GET", url, headers=headers, data=payload)
-        return response.json()['data'][0]
+        return response.json()['data'][0]['child_categories']
 
 
 def get_catalog_by_id(catalog, lan):
