@@ -6,11 +6,16 @@ from API.catalog_API import get_catalog_by_id, get_catalog
 def inline_button(ctgrs, lan):
     catalog = []
     catalog_list = []
-    for key, value in ctgrs.items():
-        catalog.append(InlineKeyboardButton(text=f"{get_catalog_by_id(key, lan)}:{get_catalog_by_id(value, lan)}", callback_data=catalog_id_callback.new(item_name=value, lan_name=lan)))
-        if len(catalog)==1:
-            catalog_list.append(catalog)   
-            catalog = []
+    for word, options in ctgrs.items():
+        for parent_id, child_id in options.items():
+            catalog.append(InlineKeyboardButton(
+                            text=f"{get_catalog_by_id(int(parent_id), lan)} --> {get_catalog_by_id(child_id, lan)}", 
+                            callback_data=catalog_id_callback.new(word=word, item_name=child_id, lan_name=lan)
+                            ))
+        
+            if len(catalog)==1:
+                    catalog_list.append(catalog)   
+                    catalog = []    
     catalog_list.append(catalog)
 
     del_cat = [

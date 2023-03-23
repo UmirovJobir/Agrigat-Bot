@@ -15,22 +15,7 @@ import json
 from typing import List, Union
 from pprint import pprint
 
-def caption_data(message):
-    data = json.loads(message)
 
-    user_id = data['user_id']
-    fullname = data['fullname']
-    group_id = data['group_id']
-    group_title = data['group_title']
-    group_link = data['group_link']
-    message_id = data['message_id']
-    message_text = data['message_text']
-    message_link = data['message_link']
-    catalog_options = data['catalog_options']
-    lan = data["lan"]
-
-
-lan_test = None
 
 @dp.message_handler(is_media_group=True, content_types=types.ContentType.ANY)
 async def handle_albums(message: types.Message, album: List[types.Message], state: FSMContext):
@@ -42,7 +27,7 @@ async def handle_albums(message: types.Message, album: List[types.Message], stat
 
                 username = caption["username"]
                 user_id = caption["user_id"]
-                fullname = ["fullname"]
+                fullname = caption["fullname"]
 
                 group_id = caption["group_id"]
                 group_title = caption['group_title']
@@ -85,20 +70,18 @@ async def handle_albums(message: types.Message, album: List[types.Message], stat
 
 
 @dp.message_handler(state=None)
-async def bot_echo(message: types.Message, state: FSMContext):
+async def bot_echo(message: types.Message):
     caption = json.loads(message.text)
     message_text = caption["message_text"]
     catalog_options = caption['catalog_options']
     lan = caption["lan"]
-
-    await state.update_data({"lan":lan})
 
     await message.answer(message_text)
 
 
 
 @dp.callback_query_handler(text_contains="catalog_id")
-async def buy_books(call: types.CallbackQuery, state: FSMContext):
+async def buy_books(call: types.CallbackQuery):
     callback_data = call.data.split(":")
     
     print(call.data)
