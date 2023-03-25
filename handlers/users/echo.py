@@ -30,7 +30,6 @@ async def handle_albums(message: types.Message, album: List[types.Message], stat
                 fullname = caption["fullname"]
 
                 group_id = caption["group_id"]
-                group_title = caption['group_title']
                 group_username = caption['group_username']
 
                 message_id = caption['message_id']
@@ -63,6 +62,7 @@ async def handle_albums(message: types.Message, album: List[types.Message], stat
         txt = "True"
 
     media_files_id = json.loads(media_group.as_json())
+    print(media_files_id)
     
     # await bot.send_media_group(-1001578600046, media=media_group)
     await bot.send_message(-1001578600046, text=txt, reply_markup=inline_button(catalog_options, lan), parse_mode=types.ParseMode.HTML)
